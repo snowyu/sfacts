@@ -1,4 +1,5 @@
 /* global describe before it */
+import LevelDB from 'nosql-leveldb';
 import should from 'should';
 import facts from '../src/system';
 
@@ -8,7 +9,7 @@ const data = ['./test/data/concepts_sm.top', './test/data/animals.tbl'];
 
 describe('Substitution Interface', () => {
   before((done) => {
-    facts.load('systemDB', data, true, (err, sfacts) => {
+    facts.load({name: 'systemDB', db:LevelDB, destroy: LevelDB.destroy.bind(LevelDB)}, data, true, (err, sfacts) => {
       if (err) {
         return done(err);
       }
@@ -16,6 +17,14 @@ describe('Substitution Interface', () => {
       done();
     });
   });
+  after((done) => {
+    facts.clean(gFacts.level, (err) => {
+      if (err) {
+        return done(err);
+      }
+      return done();
+    })
+  })
 
   describe('Find Knowledge', () => {
     // Given a concept, lets get all words that reference this concept

@@ -1,4 +1,5 @@
 /* global describe before it */
+import LevelDB from 'nosql-leveldb';
 import should from 'should';
 import facts from '../src/system';
 
@@ -8,7 +9,7 @@ const data = ['./test/data/concepts_sm.top'];
 
 describe('Expand', () => {
   before((done) => {
-    facts.load('expandDB', data, false, (err, sfacts) => {
+    facts.load({name: 'expandDB', db:LevelDB, destroy: LevelDB.destroy.bind(LevelDB)}, data, false, (err, sfacts) => {
       if (err) {
         return done(err);
       }
@@ -16,6 +17,15 @@ describe('Expand', () => {
       done();
     });
   });
+
+  after((done) => {
+    facts.clean(gFacts.level, (err) => {
+      if (err) {
+        return done(err);
+      }
+      return done();
+    })
+  })
 
   it('should create a user database.', () => {
     gFacts.createUserDB('SOME_USER_ID');

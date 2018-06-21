@@ -12,9 +12,9 @@ Note: Before v1.0.0, sfacts used to write to the filesystem using LevelDB. It no
 
 ## API
 
-* `clean(dbName, callback)`
-* `create(dbName, clean, callback)`
-* `load(dbName, files, clean, callback)`
+* `clean(dbName|level, callback)`
+* `create({name:dbName, db: LevelDB, destroy?: LevelDB.destroy.bind(LevelDB)}, clean, callback)`
+* `load({name:dbName, db: LevelDB, destroy?: LevelDB.destroy.bind(LevelDB)}, files, clean, callback)`
 
 The boolean parameter `clean` in the `create` and `load` methods wipes the existing database if it exists, before creating a new one.
 

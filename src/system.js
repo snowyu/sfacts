@@ -1,21 +1,43 @@
 import levelUp from 'levelup';
-import mongoDown from 'mongodown';
-import mongojs from 'mongojs';
+// import mongoDown from 'mongodown';
+// import mongojs from 'mongojs';
+// import LevelDB from 'nosql-leveldb';
 import levelGraph from 'levelgraph';
 import levelGraphRecursive from 'levelgraph-recursive';
 
 import expand from './expand';
 
+let destroyDB = function(){};
+
 const clean = function clean(dbName, cb) {
-  const db = mongojs(dbName);
-  db.dropDatabase((err) => {
-    db.close();
+  // const db = LevelDB(dbName);
+  if (dbName instanceof levelUp) {
+    dbName.close((err)=>{if (err) console.log('close error',err)})
+    dbName = dbName.location
+  }
+  destroyDB(dbName, (err) => {
     cb(err);
   });
 };
 
 const create = function create(dbName, cleanDb, cb) {
-  const postClean = () => levelUp(dbName, { db: mongoDown }, (err, leveldb) => {
+  let options;
+
+  if (typeof dbName !== 'string') {
+    options = dbName
+    dbName = dbName.name
+    if (typeof options.destroy === 'function') {
+      destroyDB = options.destroy
+    } else if (options.db && typeof options.db.destroy === 'function') {
+      destroyDB = options.db.destroy.bind(options.db)
+    }
+  }
+  else {
+    options = {db: LevelDB}
+    destroyDB = LevelDB.destroy.bind(LevelDB)
+  }
+
+  const postClean = () => levelUp(dbName, options, (err, leveldb) => {
     if (err) {
       return cb(err);
     }
